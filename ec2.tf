@@ -62,6 +62,7 @@ resource "aws_instance" "terra" {
     delete_on_termination = true
   }
 
+  # if default VPC is deleted - must have
   subnet_id = "subnet-064e717da4a600000"
 }
 
