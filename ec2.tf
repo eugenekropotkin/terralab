@@ -6,15 +6,15 @@ variable "aws_region" {
 
 
 provider "aws" {
-  access_key = "ACCESSKEY"
-  secret_key = "PASSWORD"
+  access_key = "VVVVVVVVVVV"
+  secret_key = "PPPPPPPPPPP"
   region = "${var.aws_region}"
 }
 
 
 
 data "aws_vpc" "selected" {
-  id = "vpc-0fd96799c38660000"
+  id = "vpc-0fd96799c3866c19f"
 }
 
 
@@ -38,31 +38,33 @@ data "aws_ami" "ubuntu" {
 
 
 
-
 resource "aws_instance" "terra" {
   # ami = "ami-090f10efc254eaf55"
   ami           = "${data.aws_ami.ubuntu.id}"
 
-  instance_type = "t2.micro"
+  instance_type = "t2.nano"
 
-  tags {
-    Name = "TerraForm"   # Name tag
-  }
+  key_name   = "kf2019"
+  associate_public_ip_address = "true"
 
-  key_name   = "sshKeyName"
+  security_groups = [
+        "sg-015aaf83c97770aa3"
+  ]
 
   root_block_device {
     volume_size = "10"   # root device size, GB
   }
 
-  ebs_block_device {
-    device_name = "/dev/xvdb"
-    volume_size = 8
-    volume_type = "gp2"
-    delete_on_termination = true
-  }
+#  ebs_block_device {
+#    device_name = "/dev/xvdb"
+#    volume_size = 8
+#    volume_type = "gp2"
+#    delete_on_termination = true
+#  }
 
+  private_ip = "10.0.0.11"
   # if default VPC is deleted - must have
-  subnet_id = "subnet-064e717da4a600000"
+  subnet_id = "subnet-064e717da4a602809"
 }
+
 
