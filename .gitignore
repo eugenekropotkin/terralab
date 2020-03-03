@@ -1,2 +1,3 @@
 roles
 terraform.tf*
+.terraform/

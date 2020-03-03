@@ -12,7 +12,6 @@ provider "aws" {
 }
 
 
-
 data "aws_vpc" "selected" {
   id = "vpc-0fd96799c3866c19f"
 }
@@ -44,7 +43,12 @@ resource "aws_instance" "terra" {
 
   instance_type = "t2.nano"
 
+  tags = {
+    Name = "bastion1"
+  }
+
   key_name   = "kf2019"
+
   associate_public_ip_address = "true"
 
   security_groups = [
@@ -52,7 +56,7 @@ resource "aws_instance" "terra" {
   ]
 
   root_block_device {
-    volume_size = "10"   # root device size, GB
+    volume_size = "20"   # root device size, GB
   }
 
 #  ebs_block_device {
@@ -63,8 +67,16 @@ resource "aws_instance" "terra" {
 #  }
 
   private_ip = "10.0.0.11"
+
   # if default VPC is deleted - must have
   subnet_id = "subnet-064e717da4a602809"
 }
+
+
+
+
+
+
+
 
 
