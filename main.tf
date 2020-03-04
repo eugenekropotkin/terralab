@@ -13,8 +13,8 @@ variable "aws_region" {
 
 # defined in creds.tf
 provider "aws" {
-  access_key = var.aws_ak
-  secret_key = var.aws_sk
+  access_key = var.aws_ak1
+  secret_key = var.aws_sk1
   region = var.aws_region
 }
 
