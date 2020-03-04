@@ -493,20 +493,17 @@ resource "aws_instance" "bastion1" {
     volume_size = "15"   # root device size, GB
   }
 
-#  ebs_block_device {
-#    device_name = "/dev/xvdb"
-#    volume_size = 8
-#    volume_type = "gp2"
-#    delete_on_termination = true
-#  }
-
   private_ip = "10.0.1.4"
-
-  # if default VPC is deleted - must have
   subnet_id = aws_subnet.public1.id
 }
 
+ output "bastion1out" {
+  value = formatlist( "#inv bastions pub=%s priv=%s key=%s name=%s", aws_instance.bastion1.public_ip, aws_instance.bastion1.private_ip, aws_instance.bastion1.key_name,  aws_instance.bastion1.tags["Name"])
+  depends_on = [aws_instance.bastion1]
+}
 
+
+# bastion2 instance
 resource "aws_instance" "bastion2" {
   ami           = data.aws_ami.image_bast.id
 
@@ -526,19 +523,14 @@ resource "aws_instance" "bastion2" {
     volume_size = "15"   # root device size, GB
   }
 
-#  ebs_block_device {
-#    device_name = "/dev/xvdb"
-#    volume_size = 8
-#    volume_type = "gp2"
-#    delete_on_termination = true
-#  }
-
   private_ip = "10.0.2.4"
-
-  # if default VPC is deleted - must have
   subnet_id = aws_subnet.public2.id
 }
 
+ output "bastion2out" {
+  value = formatlist( "#inv bastions pub=%s priv=%s key=%s name=%s", aws_instance.bastion2.public_ip, aws_instance.bastion2.private_ip, aws_instance.bastion2.key_name,  aws_instance.bastion2.tags["Name"])
+  depends_on = [aws_instance.bastion1]
+}
 
 
 
@@ -549,7 +541,7 @@ resource "aws_instance" "bastion2" {
 data "aws_ami" "debian" {
   most_recent = true
 
-  filter {
+  filter { 
     name   = "name"
     values = ["debian*10*"]
   }
@@ -569,30 +561,46 @@ data "aws_ami" "debian" {
 */
 
 
-resource "aws_network_interface_sg_attachment" "sg_attachment_server1" {
+/* resource "aws_network_interface_sg_attachment" "sg_attachment_server1" {
   security_group_id    = aws_security_group.sg_ssh.id
-  network_interface_id = aws_instance.server1.primary_network_interface_id
+  network_interface_id = aws_instance.server1[*].primary_network_interface_id
   depends_on = [ aws_instance.server1 ]
-}
+} */
 
+
+
+
+
+variable "server1_count" {
+  default = "3"
+}
 
 resource "aws_instance" "server1" {
   ami           = data.aws_ami.image_deb10.id
   #ami = data.aws_ami.image_bast.id
   instance_type = "t2.nano"
-  tags = {  Name = "server1"  }
   key_name = var.aws_key
   monitoring = false
 
-  private_ip = "10.0.4.4"
+  count = var.server1_count
+  tags = {  Name = format("server1-%d", count.index)  }
+
+  #private_ip = "10.0.4.4"
   subnet_id = aws_subnet.private1.id
-  security_groups = []
+  security_groups = [aws_security_group.sg_ssh.id]
 
 
   root_block_device {
     volume_size = "15"   # root device size, GB
   }
 
-  depends_on = [aws_nat_gateway.ngw1]
+  depends_on = [aws_nat_gateway.ngw1, aws_security_group.sg_ssh]
 }
 
+ output "serv1out" {
+  value =  [
+    for instance in aws_instance.server1:
+       formatlist( "#inv servers pub=%s priv=%s key=%s name=%s", instance.public_ip, instance.private_ip, instance.key_name, instance.tags["Name"])
+  ]
+ }
+  
