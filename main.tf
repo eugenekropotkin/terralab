@@ -532,12 +532,9 @@ resource "aws_instance" "bastion2" {
   depends_on = [aws_instance.bastion1]
 }
 
-
-
  
 /* 
 # search for image
-
 data "aws_ami" "debian" {
   most_recent = true
 
@@ -554,21 +551,10 @@ data "aws_ami" "debian" {
   owners = ["679593333241"]
 }
  
-
- output "id_debian10" {
+output "id_debian10" {
   value = data.aws_ami.debian.id
 }
 */
-
-
-/* resource "aws_network_interface_sg_attachment" "sg_attachment_server1" {
-  security_group_id    = aws_security_group.sg_ssh.id
-  network_interface_id = aws_instance.server1[*].primary_network_interface_id
-  depends_on = [ aws_instance.server1 ]
-} */
-
-
-
 
 
 variable "server1_count" {
@@ -589,7 +575,6 @@ resource "aws_instance" "server1" {
   subnet_id = aws_subnet.private1.id
   security_groups = [aws_security_group.sg_ssh.id]
 
-
   root_block_device {
     volume_size = "15"   # root device size, GB
   }
@@ -603,4 +588,4 @@ resource "aws_instance" "server1" {
        formatlist( "#inv servers pub=%s priv=%s key=%s name=%s", instance.public_ip, instance.private_ip, instance.key_name, instance.tags["Name"])
   ]
  }
-  
+
