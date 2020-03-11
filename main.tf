@@ -423,17 +423,15 @@ data "aws_ami" "image_deb10" {
 
   filter {
     name = "name"
-    values = formatlist( "%s", var.amis_os_map_regex["debian-10"])
+    values = [ "debian*10*" ]
   }
 
   filter {
-    name = "virtualization-type"
-    values = [
-      "hvm"]
+    name = "architecture"
+    values = ["x86_64"]
   }
 
-  owners = formatlist( "%s", [
-    var.amis_os_map_owners["debian-10"]])
+  owners = [ "679593333241" ]
 }
 
 
@@ -500,29 +498,6 @@ output "bastion2out" {
     aws_instance.bastion1]
 }
 
-
-/* 
-# search for image
-data "aws_ami" "debian" {
-  most_recent = true
-
-  filter { 
-    name   = "name"
-    values = ["debian*10*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["679593333241"]
-}
- 
-output "id_debian10" {
-  value = data.aws_ami.debian.id
-}
-*/
 
 
 variable "server1_count" {
