@@ -1,7 +1,7 @@
 # test terraform project
 #
-# deploys 2 public networks + 2 bastion hosts
-# deploys 2 private networks + 1 test host
+# deploys 2 public networks + 2 bastion hosts + IGW + NAT
+# deploys 2 private networks + 2 test hosts
 # + ACL between network areas
 
 
