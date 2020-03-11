@@ -1,4 +1,5 @@
 roles
-terraform.tf*
+terraform*
 .terraform/
+.idea/
 creds*
