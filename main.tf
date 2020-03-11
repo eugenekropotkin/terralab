@@ -156,15 +156,13 @@ resource "aws_route_table" "public" {
 # Associate subnet public_subnet to public route table
 resource "aws_route_table_association" "public_subnet_association1" {
   subnet_id = aws_subnet.public1.id
-  route_table_id = aws_vpc.default.main_route_table_id
-  depends_on = [
-    aws_internet_gateway.igw1]
+  route_table_id = aws_route_table.public.id
+  depends_on = [ aws_internet_gateway.igw1, aws_subnet.public1]
 }
 resource "aws_route_table_association" "public_subnet_association2" {
   subnet_id = aws_subnet.public2.id
-  route_table_id = aws_vpc.default.main_route_table_id
-  depends_on = [
-    aws_internet_gateway.igw1]
+  route_table_id = aws_route_table.public.id
+  depends_on = [ aws_internet_gateway.igw1, aws_subnet.public2]
 }
 
 # Associate subnet private_subnet to private route table
@@ -264,6 +262,15 @@ resource "aws_network_acl" "public_nacl1" {
     cidr_block = var.vpc1_cidr
     from_port = 0
     to_port = 0
+  }
+
+  ingress {
+    protocol    = "tcp"
+    rule_no    = 210
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port   = 4096
+    to_port     = 65535
   }
 
   tags = {
@@ -386,115 +393,9 @@ resource "aws_network_interface_sg_attachment" "sg_attachment2" {
     aws_instance.bastion2]
 }
 
-/**/
 
 
 #### AMI
-
-
-# AMI dictionary
-#    borrowed here: https://github.com/otassetti/terraform-aws-ami-search/blob/master/variables.tf
-
-# !warning: it's old, need to check!
-# - checked: debian-10, ubuntu-18.04
-#
-variable "amis_os_map_regex" {
-  description = "Map of regex to search amis"
-  type = map
-
-  default = {
-    "ubuntu" = "^ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-.*",
-    "ubuntu-14.04" = "^ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-.*",
-    "ubuntu-16.04" = "^ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-.*",
-    "ubuntu-18.04s" = "^ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-.*",
-    "ubuntu-18.04" = "ubuntu/images/hvm-ssd/ubuntu*18.04*",
-    "ubuntu-18.10" = "*ubuntu/images/hvm-ssd/ubuntu*18.10*server*",
-    "ubuntu-19.04" = "^ubuntu/images/hvm-ssd/ubuntu-disco-19.04-amd64-server-.*",
-    "centos" = "^CentOS.Linux.7.*x86_64.*",
-    "centos-6" = "^CentOS.Linux.6.*x86_64.*",
-    "centos-7" = "^CentOS.Linux.7.*x86_64.*",
-    "centos-8" = "^CentOS.Linux.8.*x86_64.*",
-    "rhel" = "^RHEL-7.*x86_64.*",
-    "rhel-6" = "^RHEL-6.*x86_64.*",
-    "rhel-7" = "^RHEL-7.*x86_64.*",
-    "rhel-8" = "^RHEL-8.*x86_64.*",
-    "debian" = "^debian-stretch-.*",
-    "debian-8" = "^debian-jessie-.*",
-    "debian-9" = "^debian-stretch-.*",
-    "debian-10" = "debian*10*",
-    "fedora-27" = "^Fedora-Cloud-Base-27-.*-gp2.*",
-    "amazon" = "^amzn-ami-hvm-.*x86_64-gp2",
-    "amazon-2_lts" = "^amzn2-ami-hvm-.*x86_64-gp2",
-    "suse-les" = "^suse-sles-12-sp\\d-v\\d{8}-hvm-ssd-x86_64",
-    "suse-les-12" = "^suse-sles-12-sp\\d-v\\d{8}-hvm-ssd-x86_64",
-    "windows" = "^Windows_Server-2019-English-Full-Base-.*",
-    "windows-2019-base" = "^Windows_Server-2019-English-Full-Base-.*",
-    "windows-2016-base" = "^Windows_Server-2016-English-Full-Base-.*",
-    "windows-2012-r2-base" = "^Windows_Server-2012-R2_RTM-English-64Bit-Base-.*",
-    "windows-2012-base" = "^Windows_Server-2012-RTM-English-64Bit-Base-.*",
-    "windows-2008-r2-base" = "^Windows_Server-2008-R2_SP1-English-64Bit-Base-.*"
-  }
-}
-
-variable "amis_os_map_owners" {
-  description = "Map of amis owner to filter only official amis"
-  type = map
-  default = {
-    "ubuntu" = "099720109477",
-    #CANONICAL
-    "ubuntu-14.04" = "099720109477",
-    #CANONICAL
-    "ubuntu-16.04" = "099720109477",
-    #CANONICAL
-    "ubuntu-18.04s" = "099720109477",
-    #CANONICAL
-    "ubuntu-18.04" = "099720109477",
-    #CANONICAL
-    "ubuntu-18.10" = "099720109477",
-    #CANONICAL
-    "ubuntu-19.04" = "099720109477",
-    #CANONICAL
-    "rhel" = "309956199498",
-    #Amazon Web Services
-    "rhel-6" = "309956199498",
-    #Amazon Web Services
-    "rhel-7" = "309956199498",
-    #Amazon Web Services
-    "rhel-8" = "309956199498",
-    #Amazon Web Services
-    "centos" = "679593333241",
-    "centos-6" = "679593333241",
-    "centos-7" = "679593333241",
-    "centos-8" = "679593333241",
-    "debian" = "679593333241",
-    "debian-8" = "679593333241",
-    "debian-9" = "679593333241",
-    "debian-10" = "679593333241",
-    "fedora-27" = "125523088429",
-    #Fedora
-    "amazon" = "137112412989",
-    #amazon
-    "amazon-2_lts" = "137112412989",
-    #amazon
-    "suse-les" = "013907871322",
-    #amazon
-    "suse-les-12" = "013907871322",
-    #amazon
-    "windows" = "801119661308",
-    #amazon
-    "windows-2019-base" = "801119661308",
-    #amazon
-    "windows-2016-base" = "801119661308",
-    #amazon
-    "windows-2012-r2-base" = "801119661308",
-    #amazon
-    "windows-2012-base" = "801119661308",
-    #amazon
-    "windows-2008-r2-base" = "801119661308"
-    #amazon
-  }
-}
-
 
 # look for Ubuntu 18.04
 data "aws_ami" "image_bast" {
