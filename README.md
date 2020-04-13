@@ -1,6 +1,6 @@
 ### terralab
 
-## Terraform test &amp; examples
+## AWS + Terraform example
 
 
 0. Fill the aws_region, aws_key & add credentials to creds.tf
